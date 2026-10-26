@@ -74,7 +74,7 @@ public class MainActivity extends Activity {
             if (files == null) return "[]";
             for (File f : files) {
                 try {
-                    JSONObject obj = new JSONObject(Files.readString(f.toPath(), StandardCharsets.UTF_8));
+                    JSONObject obj = new JSONObject(new String(Files.readAllBytes(f.toPath()), StandardCharsets.UTF_8));
                     JSONObject meta = new JSONObject();
                     meta.put("id", obj.optString("id"));
                     meta.put("name", obj.optString("name", "Progetto"));
@@ -91,7 +91,7 @@ public class MainActivity extends Activity {
         }
         @JavascriptInterface public String load(String id) {
             String safe = cleanId(id); if (safe == null) return "";
-            try { return Files.readString(new File(projectDir, safe + ".json").toPath(), StandardCharsets.UTF_8); }
+            try { return new String(Files.readAllBytes(new File(projectDir, safe + ".json").toPath()), StandardCharsets.UTF_8); }
             catch(Exception e) { return ""; }
         }
         @JavascriptInterface public boolean save(String id, String json) {
@@ -99,7 +99,7 @@ public class MainActivity extends Activity {
             if (safe == null || json == null) return false;
             try {
                 File tmp = new File(projectDir, safe + ".tmp");
-                Files.writeString(tmp.toPath(), json, StandardCharsets.UTF_8);
+                Files.write(tmp.toPath(), json.getBytes(StandardCharsets.UTF_8));
                 File dest = new File(projectDir, safe + ".json");
                 if (dest.exists() && !dest.delete()) return false;
                 return tmp.renameTo(dest);
